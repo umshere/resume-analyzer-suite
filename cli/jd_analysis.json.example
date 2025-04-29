@@ -1,0 +1,32 @@
+{
+  "title": "Associate Product Manager",
+  "required_skills": [
+    "Product management fundamentals",
+    "Data analysis",
+    "User research",
+    "Problem-solving",
+    "Communication"
+  ],
+  "preferred_skills": [
+    "SQL",
+    "Python",
+    "A/B testing",
+    "Product analytics tools",
+    "Agile methodologies"
+  ],
+  "minimum_experience": "2 years",
+  "education": "Bachelor's degree in Computer Science, Business, or related field",
+  "key_responsibilities": [
+    "Define and execute product strategy",
+    "Conduct user research and gather requirements",
+    "Work with engineering teams to deliver features",
+    "Analyze product metrics and user feedback",
+    "Create and maintain product documentation"
+  ],
+  "industry_knowledge": [
+    "SaaS products",
+    "B2B software",
+    "Product development lifecycle",
+    "Market research"
+  ]
+}
