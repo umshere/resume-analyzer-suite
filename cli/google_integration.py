@@ -1,3 +1,55 @@
+"""
+Google Services Integration Module (Currently Disabled)
+This module is temporarily disabled while we focus on local functionality.
+The code is preserved for future reintegration.
+"""
+
+import os
+import json
+import datetime
+from typing import Dict, List, Any
+import logging
+
+logger = logging.getLogger(__name__)
+
+class GoogleServicesManager:
+    """Stub implementation of GoogleServicesManager"""
+    def __init__(self, credentials_path: str = 'credentials.json'):
+        self.credentials_path = credentials_path
+        
+    def authenticate(self):
+        """Stub authentication method"""
+        logger.info("Google integration is currently disabled")
+        return True
+        
+    def watch_folder(self, folder_id: str) -> List[Dict]:
+        """Stub method for folder watching"""
+        logger.info("Google Drive integration is currently disabled")
+        return []
+            
+    def download_file(self, file_id: str) -> str:
+        """Stub method for file download"""
+        logger.info("Google Drive integration is currently disabled")
+        return ""
+            
+    def create_or_get_spreadsheet(self, spreadsheet_title: str) -> str:
+        """Stub method for spreadsheet creation"""
+        logger.info("Google Sheets integration is currently disabled")
+        return ""
+            
+    def update_spreadsheet(self, spreadsheet_id: str, analysis_results: Dict):
+        """Stub method for spreadsheet update"""
+        logger.info("Google Sheets integration is currently disabled")
+        pass
+
+    def format_spreadsheet(self, spreadsheet_id: str):
+        """Stub method for spreadsheet formatting"""
+        logger.info("Google Sheets integration is currently disabled")
+        pass
+
+"""
+Original implementation (commented out for reference):
+
 import os
 import json
 import datetime
@@ -26,7 +78,6 @@ class GoogleServicesManager:
         self.sheets_service = None
         
     def authenticate(self):
-        """Authenticate with Google services."""
         if os.path.exists('token.json'):
             self.creds = Credentials.from_authorized_user_file('token.json', SCOPES)
             
@@ -36,7 +87,10 @@ class GoogleServicesManager:
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
                     self.credentials_path, SCOPES)
-                self.creds = flow.run_local_server(port=0)
+                self.creds = flow.run_local_server(
+                    port=8085,
+                    open_browser=True
+                )
             
             with open('token.json', 'w') as token:
                 token.write(self.creds.to_json())
@@ -45,7 +99,6 @@ class GoogleServicesManager:
         self.sheets_service = build('sheets', 'v4', credentials=self.creds)
         
     def watch_folder(self, folder_id: str) -> List[Dict]:
-        """Get list of PDF files in the specified folder."""
         try:
             results = self.drive_service.files().list(
                 q=f"'{folder_id}' in parents and mimeType='application/pdf'",
@@ -57,7 +110,6 @@ class GoogleServicesManager:
             raise
             
     def download_file(self, file_id: str) -> str:
-        """Download a file from Google Drive and return its content."""
         try:
             request = self.drive_service.files().get_media(fileId=file_id)
             file = io.BytesIO()
@@ -71,7 +123,6 @@ class GoogleServicesManager:
             raise
             
     def create_or_get_spreadsheet(self, spreadsheet_title: str) -> str:
-        """Create a new spreadsheet or get existing one."""
         try:
             # Search for existing spreadsheet
             results = self.drive_service.files().list(
@@ -113,7 +164,6 @@ class GoogleServicesManager:
             raise
             
     def update_spreadsheet(self, spreadsheet_id: str, analysis_results: Dict):
-        """Update the spreadsheet with analysis results."""
         try:
             # Prepare headers
             headers = [
@@ -143,7 +193,7 @@ class GoogleServicesManager:
                     body={'values': [headers]}
                 ).execute()
             
-            # Prepare row data for each resume
+            # Prepare row data
             rows = []
             for resume in analysis_results['analyzed_resumes']:
                 row = [
@@ -175,7 +225,6 @@ class GoogleServicesManager:
             raise
 
     def format_spreadsheet(self, spreadsheet_id: str):
-        """Apply formatting to the spreadsheet."""
         try:
             requests = [
                 {
@@ -222,3 +271,4 @@ class GoogleServicesManager:
         except Exception as e:
             logger.error(f"Error formatting spreadsheet: {e}")
             raise
+"""

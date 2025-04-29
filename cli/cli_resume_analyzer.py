@@ -26,34 +26,16 @@ class CLIResumeAnalyzer:
         self.spreadsheet_id = None
         self.jd_data = None
 
-    def setup_google_services(self):
-        """Initialize Google services with step-by-step guidance."""
-        print("\n=== Google Services Setup ===")
+    def setup_local_mode(self):
+        """Initialize local processing mode."""
+        print("\n=== Local Mode Setup ===")
+        print("Running in local mode - results will be saved to analysis_results.json")
         
-        if not os.path.exists('credentials.json'):
-            print("\nERROR: credentials.json not found!")
-            print("Please follow these steps:")
-            print("1. Go to Google Cloud Console (https://console.cloud.google.com)")
-            print("2. Create a new project or select existing project")
-            print("3. Enable Drive API and Sheets API")
-            print("4. Go to Credentials")
-            print("5. Create OAuth 2.0 Client ID (Desktop Application)")
-            print("6. Download the client configuration file")
-            print("7. Rename it to 'credentials.json' and place it in this directory")
-            input("\nPress Enter once you have completed these steps...")
-            
-            if not os.path.exists('credentials.json'):
-                print("credentials.json still not found. Please try again.")
-                return False
-
-        try:
-            self.google_manager = GoogleServicesManager()
-            self.google_manager.authenticate()
-            print("\n✓ Successfully authenticated with Google services!")
-            return True
-        except Exception as e:
-            print(f"\nError during Google authentication: {e}")
-            return False
+        # Initialize stub Google manager (needed for compatibility)
+        self.google_manager = GoogleServicesManager()
+        self.google_manager.authenticate()
+        
+        return True
 
     def load_job_description(self):
         """Load or create job description analysis."""
@@ -170,6 +152,11 @@ class CLIResumeAnalyzer:
             # Parse response
             result = response.json()
             content = result['choices'][0]['message']['content']
+            
+            # Extract JSON from code block if present
+            if content.startswith('```json'):
+                content = content.split('```json\n')[1].split('\n```')[0]
+            
             analysis = json.loads(content)
             analysis['filename'] = filename
             
@@ -181,43 +168,40 @@ class CLIResumeAnalyzer:
                 os.remove(temp_pdf)
 
     def process_resumes(self):
-        """Process all resumes in the Google Drive folder."""
+        """Process resumes from local directory."""
         print("\n=== Processing Resumes ===")
         
         try:
-            # Get list of PDF files
-            files = self.google_manager.watch_folder(self.folder_id)
-            if not files:
-                print("\nNo PDF files found in the specified Google Drive folder!")
+            # Process single file
+            filename = "Agampreet Singh -APM resume (1).pdf"
+            if not os.path.exists(filename):
+                print(f"\nFile {filename} not found!")
                 return
             
-            print(f"\nFound {len(files)} resumes to process...")
+            print(f"\nProcessing resume: {filename}")
             results = {
                 "analyzed_resumes": []
             }
 
-            # Process each file
-            for i, file in enumerate(files, 1):
-                try:
-                    print(f"\nProcessing {i}/{len(files)}: {file['name']}")
-                    
-                    # Download file
-                    pdf_content = self.google_manager.download_file(file['id'])
-                    
-                    # Analyze resume
-                    analysis = self.analyze_resume(pdf_content, file['name'])
-                    results['analyzed_resumes'].append(analysis)
-                    
-                    print(f"✓ Analyzed {file['name']} (Match Score: {analysis['match_score']})")
-                    
-                except Exception as e:
-                    print(f"Error processing {file['name']}: {e}")
-                    continue
+            try:
+                # Read file
+                with open(filename, 'rb') as f:
+                    pdf_content = f.read()
+                
+                # Analyze resume
+                analysis = self.analyze_resume(pdf_content, filename)
+                results['analyzed_resumes'].append(analysis)
+                
+                print(f"✓ Analyzed {filename} (Match Score: {analysis['match_score']})")
+                
+            except Exception as e:
+                print(f"Error processing {filename}: {e}")
 
-            # Update spreadsheet
+            # Save results locally
             if results['analyzed_resumes']:
-                self.google_manager.update_spreadsheet(self.spreadsheet_id, results)
-                print("\n✓ Results updated in Google Sheets!")
+                with open('analysis_results.json', 'w') as f:
+                    json.dump(results, f, indent=2)
+                print("\n✓ Results saved to analysis_results.json!")
             
         except Exception as e:
             print(f"\nError during resume processing: {e}")
@@ -225,36 +209,17 @@ class CLIResumeAnalyzer:
     def run(self):
         """Main CLI interface."""
         print("\n=== Resume Analysis System ===")
-        print("This tool will help you analyze resumes using AI and store results in Google Sheets.")
+        print("This tool will help you analyze resumes using AI and store results locally.")
         
-        # Step 1: Setup Google Services
-        print("\nStep 1: Setting up Google Services...")
-        if not self.setup_google_services():
+        # Step 1: Setup Local Mode
+        print("\nStep 1: Setting up Local Mode...")
+        if not self.setup_local_mode():
             return
         
         # Step 2: Load Job Description
         print("\nStep 2: Loading Job Description...")
         if not self.load_job_description():
             return
-        
-        # Step 3: Setup Google Sheets
-        print("\nStep 3: Setting up Google Sheets...")
-        if not self.setup_spreadsheet():
-            return
-        
-        # Step 4: Get Google Drive Folder ID
-        if not self.folder_id:
-            print("\nStep 4: Google Drive Setup")
-            print("Please follow these steps to get your folder ID:")
-            print("1. Go to Google Drive")
-            print("2. Create a new folder or select existing folder with resumes")
-            print("3. Open the folder")
-            print("4. From the URL, copy the folder ID (long string after /folders/)")
-            self.folder_id = input("\nEnter the folder ID: ").strip()
-            
-            # Save to .env file
-            with open('.env', 'a') as f:
-                f.write(f"\nGOOGLE_DRIVE_FOLDER_ID={self.folder_id}")
         
         # Step 5: Process Resumes
         print("\nStep 5: Resume Processing")
@@ -263,9 +228,9 @@ class CLIResumeAnalyzer:
         
         print("\n=== Analysis Complete ===")
         print("You can now:")
-        print("1. Check your Google Drive for the 'Resume Analysis Results' spreadsheet")
+        print("1. Check 'analysis_results.json' in the current directory")
         print("2. Review the analysis results and match scores")
-        print("3. Sort/filter the spreadsheet as needed")
+        print("3. Use the results in the web UI by importing the JSON file")
         print("\nThank you for using the Resume Analysis System!")
 
 if __name__ == "__main__":

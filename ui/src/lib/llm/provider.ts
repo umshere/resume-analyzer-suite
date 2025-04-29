@@ -49,32 +49,50 @@ export class LocalLLMProvider implements LLMProvider {
 export class GeminiProvider implements LLMProvider {
   private apiKey: string;
 
-  constructor(apiKey: string = process.env.GEMINI_API_KEY || "") {
+  constructor(apiKey: string = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "") {
     this.apiKey = apiKey;
   }
 
   async analyze(prompt: string): Promise<LLMResponse> {
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateText",
+      `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${this.apiKey}`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
+          contents: {
+            parts: [
+              {
+                text: prompt,
+              },
+            ],
+          },
           generationConfig: {
             temperature: 0.2,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 2048,
           },
+          safetySettings: [
+            {
+              category: "HARM_CATEGORY_HARASSMENT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE",
+            },
+            {
+              category: "HARM_CATEGORY_HATE_SPEECH",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE",
+            },
+            {
+              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE",
+            },
+            {
+              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE",
+            },
+          ],
         }),
       }
     );
@@ -86,12 +104,26 @@ export class GeminiProvider implements LLMProvider {
     const result = await response.json();
 
     // Convert Gemini response format to standard LLMResponse
+    if (!result.candidates || !result.candidates[0]) {
+      throw new Error("Invalid response format from Gemini API");
+    }
+
+    const candidate = result.candidates[0];
+    if (
+      !candidate.content ||
+      !candidate.content.parts ||
+      !candidate.content.parts[0] ||
+      !candidate.content.parts[0].text
+    ) {
+      throw new Error("Invalid content format from Gemini API");
+    }
+
     return {
       choices: [
         {
           message: {
-            content: result.candidates[0].content.parts[0].text,
-            role: "assistant",
+            content: candidate.content.parts[0].text,
+            role: candidate.content.role || "assistant",
           },
         },
       ],

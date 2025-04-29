@@ -116,8 +116,24 @@ export default function BulkAnalysisPage() {
           formData.append("driveLink", driveLink);
         }
 
+        // Get LLM settings from localStorage
+        const provider = localStorage.getItem("llm_provider") || "local";
+        const headers: Record<string, string> = {
+          "x-llm-provider": provider,
+        };
+
+        // Add API key for Gemini
+        if (provider === "gemini") {
+          const apiKey = localStorage.getItem("gemini_api_key");
+          if (!apiKey) {
+            throw new Error("Gemini API key not found. Please set it in Settings.");
+          }
+          headers["Authorization"] = `Bearer ${apiKey}`;
+        }
+
         const response = await fetch("/api/analyze", {
           method: "POST",
+          headers,
           body: formData,
         });
 

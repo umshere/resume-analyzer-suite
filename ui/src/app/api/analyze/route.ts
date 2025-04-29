@@ -4,9 +4,19 @@ import { execSync } from "child_process";
 import path from "path";
 import os from "os";
 import { createLLMProvider } from "@/lib/llm/provider";
-import { getSheetsService } from "@/lib/google/sheets";
+import { getStorageService } from "@/lib/storage/local";
+
+// Get API key from headers
+function getApiKey(req: NextRequest): string | null {
+  const authHeader = req.headers.get("Authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    return authHeader.substring(7);
+  }
+  return null;
+}
 
 export async function POST(req: NextRequest) {
+  const apiKey = getApiKey(req);
   let tempFilePath: string | null = null;
 
   try {
@@ -45,9 +55,8 @@ ${jd}
 Resume Text:
 ${text}`;
 
-    // Get LLM provider and analyze
-    const llmProvider = createLLMProvider(process.env.LLM_PROVIDER);
-    console.log(`Using LLM provider: ${process.env.LLM_PROVIDER || "local"}`);
+    // Use configured LLM provider from environment
+    const llmProvider = createLLMProvider(process.env.NEXT_PUBLIC_LLM_PROVIDER);
 
     const analysis = await llmProvider.analyze(prompt);
 
@@ -61,15 +70,15 @@ ${text}`;
     // Add file metadata
     result.filename = file.name;
     result.analyzed_at = new Date().toISOString();
-    result.provider = process.env.LLM_PROVIDER || "local";
+    result.provider = process.env.NEXT_PUBLIC_LLM_PROVIDER || "local";
 
-    // Try to save to Google Sheets if connected
+    // Save to local storage
     try {
-      const sheetsService = getSheetsService();
-      await sheetsService.appendResult(result);
+      const storage = getStorageService();
+      await storage.saveResult(result);
     } catch (error) {
-      console.error("Failed to save to Google Sheets:", error);
-      // Don't fail the request if sheets fails
+      console.error("Failed to save to local storage:", error);
+      // Don't fail the request if storage fails
     }
 
     return NextResponse.json(result);
