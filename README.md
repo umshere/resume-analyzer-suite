@@ -1,213 +1,93 @@
-# Resume Analyzer for APM Hiring
+# Resume Analyzer
 
-An AI-powered resume analysis system with support for both single and bulk processing. Features a modern web interface, multiple LLM providers, and Google Workspace integration.
-
-![Architecture Overview](ARCHITECTURE.md#system-overview)
+A tool to analyze resumes using AI and provide structured feedback.
 
 ## Features
 
-- 🎯 **Multiple Analysis Modes**
+- PDF text extraction and analysis
+- AI-powered resume evaluation against job requirements
+- Local storage for analysis results
+- Web UI for easy interaction
+- Support for multiple LLM providers (Gemini, Local)
 
-  - Single resume playground
-  - Bulk processing with progress tracking
-  - Google Drive integration
+## Setup Instructions
 
-- 🤖 **Flexible LLM Support**
+### Prerequisites
 
-  - Local LLM (default)
-  - Google Gemini
-  - OpenRouter
-  - Custom endpoints
+1. Node.js 18+ for the UI
+2. Python 3.8+ for the CLI
+3. pdftotext utility for PDF processing:
+   - **Windows**: Download from [Xpdf Tools](https://www.xpdfreader.com/download.html)
+     - Download the Windows command-line tools
+     - Extract the archive and add the bin directory to your PATH
+   - **macOS**: `brew install poppler`
+   - **Linux**: `sudo apt-get install poppler-utils`
 
-- 🎨 **Modern UI/UX**
-
-  - Built with Next.js 14
-  - shadcn/ui components
-  - Real-time progress tracking
-  - Responsive design
-
-- 📊 **Rich Analysis**
-  - Match scoring
-  - Key skills identification
-  - Experience alignment
-  - Education evaluation
-  - Detailed rationale
-
-## Quick Start
+### Installation
 
 1. Clone the repository:
 
-```bash
-git clone <repository-url>
-cd resume-analyzer
-```
+   ```bash
+   git clone [repository-url]
+   cd resume-analyzer
+   ```
 
-2. Install dependencies:
+2. Set up the UI:
 
-```bash
-# Backend dependencies
-pip install -r requirements.txt
+   ```bash
+   cd ui
+   npm install
+   cp .env.example .env
+   ```
 
-# Frontend dependencies
-cd resume-analyzer-ui
-npm install
-```
+3. Set up the CLI:
 
-3. Configure environment:
+   ```bash
+   cd cli
+   pip install -r requirements.txt
+   cp config.env.example config.env
+   ```
 
-```bash
-# Copy example configs
-cp config.env.example config.env
-cd resume-analyzer-ui
-cp .env.local.example .env.local
-```
+4. Configure the LLM provider in `.env`:
+   ```
+   NEXT_PUBLIC_LLM_PROVIDER=gemini
+   NEXT_PUBLIC_GEMINI_API_KEY=your-api-key
+   ```
 
-4. Start the services:
+### Usage
 
-```bash
-# Terminal 1: Start LLM endpoint
-python resume_analyzer.py
+1. Start the UI:
 
-# Terminal 2: Start web UI
-cd resume-analyzer-ui
-npm run dev
-```
+   ```bash
+   cd ui
+   npm run dev
+   ```
 
-5. Open http://localhost:3000 in your browser
+2. Open http://localhost:3000 in your browser
 
-## Usage Options
+3. Upload resumes and get AI-powered analysis
 
-### 1. Playground Mode
+## TODO
 
-- Perfect for analyzing single resumes
-- Interactive feedback
-- Detailed analysis view
+### Google Integration (Work in Progress)
 
-```bash
-http://localhost:3000/playground
-```
+The Google Drive and Sheets integration is currently disabled while we improve its implementation. Future updates will include:
 
-### 2. Bulk Analysis
+- [ ] Simplified OAuth2 setup process
+- [ ] Better error handling
+- [ ] Improved documentation
+- [ ] Cross-platform testing
 
-- Process multiple resumes
-- Progress tracking
-- Sorted results
-
-```bash
-http://localhost:3000/bulk
-```
-
-### 3. Google Integration
-
-- Upload to Drive
-- Results in Sheets
-- Share analysis links
-
-## Architecture
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for:
-
-- System overview
-- Component structure
-- Data flow diagrams
-- Integration points
-- Configuration options
-
-## LLM Configuration
-
-### Local LLM (Default)
-
-```env
-LLM_PROVIDER=local
-LLM_ENDPOINT=http://localhost:1234
-```
-
-### Google Gemini
-
-```env
-LLM_PROVIDER=gemini
-LLM_API_KEY=your_gemini_api_key
-```
-
-### OpenRouter
-
-```env
-LLM_PROVIDER=openrouter
-LLM_API_KEY=your_openrouter_key
-LLM_MODEL=mistral-7b-instruct
-```
-
-## Google Integration
-
-1. Create a Google Cloud Project
-2. Enable required APIs:
-   - Google Drive API
-   - Google Sheets API
-3. Create OAuth credentials
-4. Configure environment:
-
-```env
-GOOGLE_DRIVE_FOLDER_ID=your_folder_id
-GOOGLE_SHEETS_ID=your_sheet_id
-GOOGLE_CLIENT_ID=your_client_id
-GOOGLE_CLIENT_SECRET=your_client_secret
-```
-
-## Development
-
-### Project Structure
-
-```
-resume-analyzer/
-├── backend/              # Python backend
-│   ├── analyzers/        # Analysis logic
-│   ├── integrations/     # External services
-│   └── utils/           # Helper functions
-├── resume-analyzer-ui/   # Next.js frontend
-│   └── src/
-│       ├── app/         # Pages & API routes
-│       ├── components/  # UI components
-│       └── lib/        # Utilities
-└── docs/               # Documentation
-```
-
-### Adding New Features
-
-1. Backend Changes
-
-```bash
-# Create new analyzer
-touch backend/analyzers/new_feature.py
-
-# Update requirements
-pip freeze > requirements.txt
-```
-
-2. Frontend Changes
-
-```bash
-# Create new component
-cd resume-analyzer-ui
-npx shadcn-ui@latest add new-component
-
-# Add page
-touch src/app/new-feature/page.tsx
-```
+If you need Google integration, please check back for updates or contribute to its development.
 
 ## Contributing
 
 1. Fork the repository
-2. Create feature branch
-3. Commit changes
-4. Push to branch
-5. Open pull request
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
-
-## Acknowledgments
-
-- shadcn/ui for components
-- Next.js team
-- OpenAI for LLM architecture guidance
+This project is licensed under the MIT License - see the LICENSE file for details.
