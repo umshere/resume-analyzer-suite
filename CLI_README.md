@@ -87,6 +87,27 @@ LLM_ENDPOINT=http://localhost:1234
    - Find the "Resume Analysis Results" spreadsheet
    - Review candidate scores and analysis
 
+## CLI Usage Instructions
+
+1. **Local Mode**:
+
+   - Ensure you have the `jd_analysis.json` file in the same directory as the script.
+   - Run the script: `python cli_resume_analyzer.py`
+   - Follow the prompts to analyze resumes and save results locally.
+
+2. **Google Sheets Mode**:
+
+   - Ensure you have the `credentials.json` file in the same directory as the script.
+   - Run the script: `python cli_resume_analyzer.py`
+   - Follow the prompts to analyze resumes and save results to Google Sheets.
+
+## Features
+
+- **Bulk Processing**: Analyze multiple resumes at once.
+- **Match Scoring**: Get detailed match scores for each candidate against job requirements.
+- **Local Storage**: Save analysis results locally in `analysis_results.json`.
+- **Google Sheets Integration**: Save analysis results to a Google Sheets spreadsheet.
+
 ## Troubleshooting
 
 ### Common Issues:
